@@ -2,21 +2,23 @@ package com.thecocktail.hackerrank.infrastructure.controller.api;
 
 import com.google.gson.Gson;
 import com.thecocktail.hackerrank.application.command.APIResponseCommand;
+import com.thecocktail.hackerrank.application.command.AssetCommand;
 import com.thecocktail.hackerrank.application.command.IOTDeviceCommand;
 import com.thecocktail.hackerrank.infrastructure.net.Rest;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class APIController {
 
-    private Rest rest = new Rest();
+    private final Rest rest = new Rest();
 
     public List<IOTDeviceCommand> getByStatusAndParentId(String statusQuery, int parentId) {
-        int numberPages = 5;
+        int numberPages = 10;
         List<APIResponseCommand> responses = new ArrayList<>();
         for (int i = 0; i < numberPages; i++) {
             getByStatusAndPage(statusQuery, i)
@@ -25,9 +27,8 @@ public class APIController {
         return responses.stream().map(APIResponseCommand::getData)
                 .flatMap(List::stream)
                 .filter(device -> Optional.ofNullable(device.getParent())
-                       .filter(parent -> parent.getId() == parentId)
-                       .map(p -> true)
-                       .orElse(false))
+                        .filter(parent -> parent.getId() == parentId)
+                        .isPresent())
                 .collect(Collectors.toList());
     }
 
